@@ -1,0 +1,2821 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenClaw 安装向导</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --surface: #121a2b;
+        --surface2: #18233a;
+        --border: rgba(148, 163, 184, 0.18);
+        --text: #e5eefc;
+        --text2: #c8d4e8;
+        --text3: #93a4be;
+        --accent: #7c9cff;
+        --success: #22c55e;
+        --error: #ef4444;
+        --warn: #f59e0b;
+        --term-bg: #09101d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(180deg, #09111f 0%, #10192b 100%);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 28px 18px 40px;
+      }
+
+      .hero,
+      .card,
+      .step-card {
+        background: rgba(18, 26, 43, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero {
+        padding: 22px;
+        margin-bottom: 16px;
+      }
+
+      .hero h1,
+      .card h2,
+      .step-card h3 {
+        margin: 0 0 10px;
+      }
+
+      .muted {
+        color: var(--text3);
+      }
+
+      .chips,
+      .actions,
+      .step-actions,
+      .config-actions,
+      .solution-footer {
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .inline-msg {
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      .inline-msg.ok {
+        color: #86efac;
+      }
+
+      .inline-msg.warn {
+        color: #fdba74;
+      }
+
+      .copyable {
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .chip,
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(124, 156, 255, 0.1);
+        border: 1px solid rgba(124, 156, 255, 0.2);
+        color: var(--text2);
+        font-size: 12px;
+      }
+
+      .status.ok {
+        color: #b8f7c8;
+        border-color: rgba(34, 197, 94, 0.35);
+        background: rgba(34, 197, 94, 0.12);
+      }
+
+      .status.bad {
+        color: #fecaca;
+        border-color: rgba(239, 68, 68, 0.35);
+        background: rgba(239, 68, 68, 0.12);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 16px;
+      }
+
+      .card,
+      .step-card {
+        padding: 18px;
+      }
+
+      .steps {
+        display: grid;
+        gap: 14px;
+      }
+
+      .common-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .common-action-card {
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(9, 16, 29, 0.56);
+      }
+
+      .common-action-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+
+      .common-action-desc {
+        color: var(--text3);
+        font-size: 12px;
+        line-height: 1.7;
+        margin-bottom: 10px;
+      }
+
+      .step-card.done {
+        border-color: rgba(34, 197, 94, 0.5);
+      }
+
+      .step-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+
+      .btn {
+        appearance: none;
+        border: 1px solid rgba(124, 156, 255, 0.3);
+        background: rgba(124, 156, 255, 0.12);
+        color: var(--text);
+        padding: 9px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn:hover {
+        filter: brightness(1.06);
+      }
+
+      .btn.secondary {
+        background: rgba(148, 163, 184, 0.08);
+        border-color: rgba(148, 163, 184, 0.22);
+      }
+
+      .btn.success {
+        background: rgba(34, 197, 94, 0.16);
+        border-color: rgba(34, 197, 94, 0.35);
+      }
+
+      .btn.warn {
+        background: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.35);
+      }
+
+      .step-command,
+      .config-preview,
+      .terminal {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--term-bg);
+      }
+
+      .step-command,
+      .config-preview {
+        padding: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #dde8ff;
+      }
+
+      .step-note {
+        margin-top: 8px;
+        color: var(--text3);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .step-note.hidden {
+        display: none;
+      }
+
+      .step-note-toggle {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+
+      .step-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(245, 158, 11, 0.24);
+        background: rgba(245, 158, 11, 0.1);
+        color: #fde68a;
+        font-size: 12px;
+      }
+
+      .mode-switch {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+
+      .mode-switch .btn.active {
+        background: rgba(34, 197, 94, 0.16);
+        border-color: rgba(34, 197, 94, 0.35);
+      }
+
+      .terminal {
+        margin-top: 12px;
+        padding: 10px 12px;
+        max-height: 240px;
+        overflow: auto;
+      }
+
+      .term-line {
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #b8c6df;
+      }
+
+      .term-line.warn {
+        color: #fdba74;
+      }
+
+      .term-line.ok {
+        color: #86efac;
+      }
+
+      .config-panel {
+        display: grid;
+        gap: 10px;
+      }
+
+      .info-box {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(9, 16, 29, 0.66);
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+
+      .notice {
+        border: 1px solid rgba(245, 158, 11, 0.28);
+        border-radius: 12px;
+        background: rgba(245, 158, 11, 0.08);
+        padding: 12px;
+        margin-top: 12px;
+        color: #fde68a;
+      }
+
+      .notice.hidden {
+        display: none;
+      }
+
+      .link-btn {
+        display: inline-block;
+        margin-top: 8px;
+        color: #c7d7ff;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      .info-row:last-child {
+        border-bottom: 0;
+      }
+
+      .mono {
+        font-family: Consolas, monospace;
+        word-break: break-all;
+      }
+
+      label {
+        color: var(--text2);
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0d1526;
+        color: var(--text);
+      }
+
+      .error-panel {
+        margin-top: 12px;
+        border: 1px solid rgba(239, 68, 68, 0.28);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .error-head {
+        padding: 10px 12px;
+        background: rgba(239, 68, 68, 0.08);
+        color: #fecaca;
+      }
+
+      .error-sub {
+        margin-top: 6px;
+        color: #fca5a5;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .error-body {
+        padding: 12px;
+      }
+
+      .error-snippet {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        background: rgba(9, 16, 29, 0.7);
+        color: #f9d0d0;
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .error-full {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(9, 16, 29, 0.78);
+        color: #d9e5f7;
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .result-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 12px;
+        margin-bottom: 10px;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .compact-select {
+        width: auto;
+        min-width: 120px;
+        padding: 8px 10px;
+      }
+
+      .compact-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      .compact-check input {
+        width: auto;
+      }
+
+      .result-title {
+        font-size: 13px;
+        color: var(--text2);
+      }
+
+      .result-status {
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      .empty-state {
+        padding: 12px;
+        border: 1px dashed rgba(148, 163, 184, 0.25);
+        border-radius: 10px;
+        color: var(--text3);
+      }
+
+      .feedback-box {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(245, 158, 11, 0.22);
+        background: rgba(245, 158, 11, 0.08);
+      }
+
+      .feedback-title {
+        color: #fde68a;
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+
+      .feedback-text {
+        color: var(--text2);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .feedback-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .solution-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 10px;
+      }
+
+      .solution-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      .solution-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(148, 163, 184, 0.08);
+      }
+
+      .solution-badge.ai {
+        color: #bbf7d0;
+        border-color: rgba(34, 197, 94, 0.25);
+        background: rgba(34, 197, 94, 0.1);
+      }
+
+      .solution-badge.community {
+        color: #c7d2fe;
+        border-color: rgba(124, 156, 255, 0.3);
+        background: rgba(124, 156, 255, 0.12);
+      }
+
+      .solution-summary {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 10px;
+        color: var(--text3);
+        font-size: 12px;
+      }
+
+      .ai-section {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 10px;
+        background: rgba(9, 16, 29, 0.45);
+      }
+
+      .ai-section.reason {
+        border-color: rgba(245, 158, 11, 0.24);
+        background: rgba(245, 158, 11, 0.06);
+      }
+
+      .ai-section.solution {
+        border-color: rgba(34, 197, 94, 0.22);
+        background: rgba(34, 197, 94, 0.06);
+      }
+
+      .ai-section-title {
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .step-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .step-item {
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        background: rgba(9, 16, 29, 0.45);
+      }
+
+      .step-item-title {
+        font-size: 12px;
+        color: var(--text3);
+        margin-bottom: 6px;
+      }
+
+      .cmd-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(124, 156, 255, 0.25);
+        background: rgba(124, 156, 255, 0.1);
+        color: var(--text2);
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      .run-status {
+        font-size: 12px;
+        color: var(--text3);
+      }
+
+      .run-status.ok {
+        color: #86efac;
+      }
+
+      .run-status.warn {
+        color: #fdba74;
+      }
+
+      .queue-box {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(124, 156, 255, 0.16);
+        background: rgba(124, 156, 255, 0.06);
+      }
+
+      .queue-status {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text3);
+      }
+
+      .queue-status.ok {
+        color: #86efac;
+      }
+
+      .queue-status.warn {
+        color: #fdba74;
+      }
+
+      .queue-log {
+        margin-top: 10px;
+        max-height: 180px;
+        overflow: auto;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(9, 16, 29, 0.5);
+      }
+
+      .queue-log-line {
+        font-family: Consolas, monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--text2);
+      }
+
+      .queue-log-line.ok {
+        color: #86efac;
+      }
+
+      .queue-log-line.warn {
+        color: #fdba74;
+      }
+
+      .diff-box {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        background: rgba(9, 16, 29, 0.42);
+      }
+
+      .diff-row {
+        margin-top: 8px;
+        color: var(--text2);
+        line-height: 1.7;
+        word-break: break-word;
+      }
+
+      .diff-label {
+        color: var(--text3);
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .diff-mark {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fecaca;
+        padding: 1px 4px;
+        border-radius: 4px;
+      }
+
+      .solution-text {
+        color: var(--text2);
+        line-height: 1.7;
+      }
+
+      .solution-text pre,
+      .solution-text code {
+        background: #0d1526;
+        border-radius: 6px;
+      }
+
+      .solution-text pre {
+        padding: 10px;
+        overflow: auto;
+      }
+
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        min-width: 220px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(10, 15, 25, 0.96);
+        border: 1px solid var(--border);
+        color: var(--text);
+        display: none;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="hero">
+        <h1>OpenClaw 在线安装向导</h1>
+        <p class="muted">
+          自动识别系统，支持一键执行安装命令、生成配置文件、写入本机配置，以及报错库检索。
+        </p>
+        <div class="chips">
+          <span class="chip" id="detected-os-chip">系统识别中...</span>
+          <span class="status" id="bridge-status">Bridge 检测中...</span>
+        </div>
+        <div id="bridge-notice" class="notice hidden"></div>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h2>安装步骤</h2>
+          <p class="muted">默认按当前系统展示步骤，你也可以手动切换。</p>
+          <div class="actions" style="margin-bottom: 14px;">
+            <button class="btn secondary" onclick="switchOS('windows')">Windows</button>
+            <button class="btn secondary" onclick="switchOS('mac')">macOS</button>
+          </div>
+          <div class="mode-switch">
+            <button id="mode-official" class="btn secondary" onclick="setInstallMode('official')">官方方式</button>
+            <button id="mode-mirror" class="btn secondary" onclick="setInstallMode('mirror')">国内镜像</button>
+          </div>
+          <div id="steps" class="steps"></div>
+        </section>
+
+        <section class="card">
+          <h2>配置 OpenClaw</h2>
+          <div class="info-box">
+            <div class="actions" style="margin-bottom: 12px;">
+              <button class="btn secondary" onclick="loadSystemInfo()">刷新本机状态</button>
+            </div>
+            <div class="info-row">
+              <span class="muted">OpenClaw 版本</span>
+              <span id="info-version">检测中...</span>
+            </div>
+            <div class="info-row">
+              <span class="muted">网关状态</span>
+              <span id="info-gateway">检测中...</span>
+            </div>
+            <div class="info-row">
+              <span class="muted">网关详情</span>
+              <span id="info-gateway-detail" class="mono">检测中...</span>
+            </div>
+            <div class="info-row">
+              <span class="muted">网关面板</span>
+              <span id="info-gateway-url" class="mono">检测中...</span>
+            </div>
+            <div class="info-row">
+              <span class="muted">存储模式</span>
+              <span id="info-storage">检测中...</span>
+            </div>
+            <div class="info-row">
+              <span class="muted">配置路径</span>
+              <span id="info-config-path" class="mono">检测中...</span>
+            </div>
+          </div>
+          <div class="config-panel">
+            <label for="api-key-input">明略 API Key</label>
+            <input id="api-key-input" type="password" placeholder="请输入 API Key" />
+
+            <label for="base-url-input">Base URL</label>
+            <input id="base-url-input" value="https://llm-gateway.mlamp.cn/" />
+
+            <label for="model-input">模型</label>
+            <input id="model-input" value="claude-sonnet-4-6" />
+
+            <label for="workspace-input">工作空间路径</label>
+            <input id="workspace-input" />
+
+            <div class="config-actions">
+              <button class="btn" onclick="generateConfig()">生成配置文件</button>
+              <button class="btn secondary" onclick="downloadConfigFile()">下载配置文件</button>
+              <button class="btn success" onclick="replaceConfigFile()">一键替换到本机</button>
+            </div>
+
+            <div id="config-path-hint" class="muted"></div>
+            <div id="config-write-result" class="muted"></div>
+            <pre id="config-preview" class="config-preview">点击“生成配置文件”后显示 JSON 预览。</pre>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top: 16px;">
+        <h2>安装后常用操作</h2>
+        <p class="muted">安装完成后，可以直接一键启动、重启、停止、探测和修复 OpenClaw 网关。</p>
+        <div id="common-actions" class="common-actions-grid"></div>
+      </section>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      const API_BASE = `${location.protocol}//${location.host}/api`;
+      const WS_URL = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
+      const detectedOS = navigator.platform.toLowerCase().includes("win") ? "windows" : "mac";
+      const state = {
+        os: detectedOS,
+        installMode: loadInstallMode(),
+        ws: null,
+        bridgeReady: false,
+        generatedConfigText: "",
+        configPaths: [],
+        stepOutputs: {},
+        systemInfo: null,
+        searchPrefs: {},
+        feedbackStore: loadFeedbackStore(),
+        inlineRuns: {},
+        aiQueues: {},
+        aiQueueLogs: {},
+        stepNotePrefs: loadStepNotePrefs()
+      };
+
+      const STEP_GROUPS = {
+        windows: [
+          { id: "node", title: "安装 Node.js", cmd: "winget install OpenJS.NodeJS.LTS" },
+          {
+            id: "openclaw",
+            title: "安装 OpenClaw（官方源）",
+            cmd: "npm install -g openclaw@latest",
+            note: "常规安装方式。",
+            mode: "official"
+          },
+          {
+            id: "openclaw-cn",
+            title: "安装 OpenClaw（国内镜像，可替代上一步）",
+            cmd: "iwr -useb https://open-claw.org.cn/install-cn.ps1 | iex",
+            note: "如果官方安装慢或失败，可以改用国内镜像脚本。该步骤与上一条二选一。",
+            badge: "可选镜像",
+            mode: "mirror"
+          },
+          { id: "policy", title: "允许本地脚本执行", cmd: "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser" },
+          { id: "gateway-install", title: "安装网关组件", cmd: "openclaw gateway install" },
+          { id: "version", title: "检查版本", cmd: "openclaw --version" },
+          { id: "gateway", title: "检查网关状态", cmd: "openclaw gateway status" }
+        ],
+        mac: [
+          { id: "xcode", title: "安装 Command Line Tools", cmd: "xcode-select --install" },
+          {
+            id: "brew",
+            title: "安装 Homebrew（国内镜像）",
+            cmd: '/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"',
+            note: "安装过程中输入电脑密码时不显示字符，属于正常现象。"
+          },
+          {
+            id: "brew-profile-init",
+            title: "初始化 zprofile",
+            cmd: "echo >> ~/.zprofile",
+            note: "为 Homebrew 环境变量写入做准备。"
+          },
+          {
+            id: "brew-shellenv-file",
+            title: "写入 Homebrew 环境变量",
+            cmd: "echo 'eval \"$(/opt/homebrew/bin/brew shellenv zsh)\"' >> ~/.zprofile",
+            note: "把 brew shellenv 追加到 zprofile。"
+          },
+          {
+            id: "brew-shellenv-apply",
+            title: "立即加载 Homebrew 环境变量",
+            cmd: "eval \"$(/opt/homebrew/bin/brew shellenv zsh)\"",
+            note: "不重开终端也能立即使用 brew。"
+          },
+          {
+            id: "brew-doctor",
+            title: "验证 Homebrew",
+            cmd: "brew doctor"
+          },
+          { id: "node", title: "安装 Node.js", cmd: "brew install node" },
+          {
+            id: "openclaw",
+            title: "安装 OpenClaw（官方源）",
+            cmd: "curl -fsSL https://openclaw.ai/install.sh | bash",
+            note: "常规安装方式。",
+            mode: "official"
+          },
+          {
+            id: "openclaw-cn",
+            title: "安装 OpenClaw（国内镜像，可替代上一步）",
+            cmd: "curl -fsSL https://open-claw.org.cn/install-cn.sh | bash",
+            note: "如果官方脚本慢或失败，可以改用国内镜像脚本。该步骤与上一条二选一。",
+            badge: "可选镜像",
+            mode: "mirror"
+          },
+          {
+            id: "gateway-install",
+            title: "安装网关组件",
+            cmd: "openclaw gateway install"
+          },
+          { id: "version", title: "检查版本", cmd: "openclaw --version" },
+          { id: "gateway", title: "检查网关状态", cmd: "openclaw gateway status" }
+        ]
+      };
+
+      const FRONTEND_ALLOWED_COMMAND_PREFIXES = [
+        "xcode-select --install",
+        "xcode-select -p",
+        "/bin/zsh -c",
+        "echo >> ~/.zprofile",
+        "echo 'eval \"$(/opt/homebrew/bin/brew shellenv zsh)\"' >> ~/.zprofile",
+        "eval \"$(/opt/homebrew/bin/brew shellenv zsh)\"",
+        "brew doctor",
+        "brew install node",
+        "brew upgrade node",
+        "npm install -g npm@latest",
+        "curl -fsSL https://openclaw.ai/install.sh | bash",
+        "curl -fsSL https://open-claw.org.cn/install-cn.sh | bash",
+        "openclaw --version",
+        "openclaw status",
+        "openclaw health",
+        "openclaw doctor",
+        "openclaw gateway install",
+        "openclaw gateway start",
+        "openclaw gateway restart",
+        "openclaw gateway stop",
+        "openclaw gateway probe",
+        "openclaw gateway health",
+        "openclaw gateway status",
+        "openclaw gateway",
+        "openclaw onboard --install-daemon",
+        "source ~/.bashrc",
+        "source ~/.zshrc",
+        "winget install OpenJS.NodeJS.LTS",
+        "winget upgrade OpenJS.NodeJS.LTS",
+        "npm install -g openclaw@latest",
+        "iwr -useb https://openclaw.ai/install.ps1 | iex",
+        "iwr -useb https://open-claw.org.cn/install-cn.ps1 | iex",
+        "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser",
+        "node -v"
+      ];
+
+      const COMMON_ACTIONS = [
+        {
+          id: "gateway-start",
+          title: "一键启动",
+          cmd: "openclaw gateway start",
+          description: "启动本机 Gateway 服务，适合安装完成后的首次拉起。",
+          tone: "success"
+        },
+        {
+          id: "gateway-restart",
+          title: "一键重启",
+          cmd: "openclaw gateway restart",
+          description: "重启 Gateway 服务，适合改完配置或状态异常后恢复。",
+          tone: "warn"
+        },
+        {
+          id: "gateway-stop",
+          title: "停止服务",
+          cmd: "openclaw gateway stop",
+          description: "停止 Gateway 服务，便于手动维护或准备重新安装。",
+          tone: "secondary"
+        },
+        {
+          id: "gateway-status",
+          title: "检查状态",
+          cmd: "openclaw gateway status",
+          description: "查看网关服务状态与当前探测结果。",
+          tone: "secondary"
+        },
+        {
+          id: "gateway-probe",
+          title: "连通性探测",
+          cmd: "openclaw gateway probe",
+          description: "检查本机 Gateway 是否可达，并输出诊断信息。",
+          tone: "secondary"
+        },
+        {
+          id: "doctor",
+          title: "修复诊断",
+          cmd: "openclaw doctor",
+          description: "执行 OpenClaw 健康检查和快速修复，适合排查异常。",
+          tone: "success"
+        }
+      ];
+
+      function getWorkspaceDefault() {
+        return state.os === "windows" ? "%USERPROFILE%\\.openclaw\\workspace" : "~/.openclaw/workspace";
+      }
+
+      function getCommonActionRunId(actionId) {
+        return `common:${actionId}`;
+      }
+
+      function getCommonActionById(actionId) {
+        return COMMON_ACTIONS.find((action) => action.id === actionId);
+      }
+
+      function getCommonActionByRunId(runId) {
+        if (!String(runId || "").startsWith("common:")) {
+          return null;
+        }
+        return getCommonActionById(String(runId).slice("common:".length));
+      }
+
+      function isCommonActionId(targetId) {
+        return Boolean(getCommonActionByRunId(targetId));
+      }
+
+      function getTerminalElement(targetId) {
+        const commonAction = getCommonActionByRunId(targetId);
+        if (commonAction) {
+          return document.getElementById(`term-common-${commonAction.id}`);
+        }
+        return document.getElementById(`term-${targetId}`);
+      }
+
+      function getSteps() {
+        return STEP_GROUPS[state.os].filter((step) => {
+          if (!step.mode) {
+            return true;
+          }
+          return step.mode === state.installMode;
+        });
+      }
+
+      function toast(message) {
+        const el = document.getElementById("toast");
+        el.textContent = message;
+        el.style.display = "block";
+        clearTimeout(el.__timer);
+        el.__timer = setTimeout(() => {
+          el.style.display = "none";
+        }, 2800);
+      }
+
+      function loadFeedbackStore() {
+        try {
+          return JSON.parse(localStorage.getItem("error_feedback_store") || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function loadInstallMode() {
+        return localStorage.getItem("install_mode") || "official";
+      }
+
+      function loadStepNotePrefs() {
+        try {
+          return JSON.parse(localStorage.getItem("step_note_prefs") || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function saveInstallMode() {
+        localStorage.setItem("install_mode", state.installMode);
+      }
+
+      function saveStepNotePrefs() {
+        localStorage.setItem("step_note_prefs", JSON.stringify(state.stepNotePrefs));
+      }
+
+      function saveFeedbackStore() {
+        localStorage.setItem("error_feedback_store", JSON.stringify(state.feedbackStore));
+      }
+
+      function simpleHash(text) {
+        let hash = 0;
+        const str = String(text || "");
+        for (let i = 0; i < str.length; i += 1) {
+          hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+        }
+        return hash.toString(16);
+      }
+
+      function makeFeedbackKey(source, identifier) {
+        return `${source}:${identifier}`;
+      }
+
+      function getStoredFeedback(key) {
+        return state.feedbackStore[key] || null;
+      }
+
+      function setStoredFeedback(key, value) {
+        state.feedbackStore[key] = {
+          ...value,
+          updatedAt: Date.now()
+        };
+        saveFeedbackStore();
+      }
+
+      function getSearchPref(stepId) {
+        return state.searchPrefs[stepId] || {
+          sort: "best",
+          limit: 5,
+          source: "all",
+          sameVersionOnly: false,
+          minVotes: 0
+        };
+      }
+
+      function setSearchPref(stepId, patch) {
+        state.searchPrefs[stepId] = {
+          ...getSearchPref(stepId),
+          ...patch
+        };
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function formatSolution(text) {
+        const escaped = escapeHtml(text);
+        return escaped
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/```[\w-]*\n([\s\S]*?)```/g, "<pre>$1</pre>")
+          .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+          .replace(/\n/g, "<br>");
+      }
+
+      function parseAiSections(text) {
+        const raw = String(text || "").trim();
+        const reasonMatch = raw.match(/\*\*原因\*\*[：:]\s*([\s\S]*?)(?=\n\s*\*\*解决方案\*\*[：:]|$)/);
+        const solutionMatch = raw.match(/\*\*解决方案\*\*[：:]\s*([\s\S]*)$/);
+
+        return {
+          reason: reasonMatch ? reasonMatch[1].trim() : "",
+          solution: solutionMatch ? solutionMatch[1].trim() : "",
+          raw
+        };
+      }
+
+      function renderAiSections(text) {
+        const parsed = parseAiSections(text);
+        if (!parsed.reason && !parsed.solution) {
+          return `<div class="solution-text">${formatSolution(parsed.raw)}</div>`;
+        }
+
+        const parts = [];
+        if (parsed.reason) {
+          parts.push(`
+            <div class="ai-section reason">
+              <div class="ai-section-title">原因</div>
+              <div class="solution-text">${formatSolution(parsed.reason)}</div>
+            </div>
+          `);
+        }
+
+        if (parsed.solution) {
+          parts.push(`
+            <div class="ai-section solution">
+              <div class="ai-section-title">解决方案</div>
+              <div class="solution-text">${formatSolution(parsed.solution)}</div>
+            </div>
+          `);
+        }
+
+        return parts.join("");
+      }
+
+      function extractAiActions(text) {
+        const raw = String(text || "");
+        const codeBlocks = [...raw.matchAll(/```[\w-]*\n([\s\S]*?)```/g)]
+          .map((match) => match[1].trim())
+          .filter(Boolean);
+        const numberedSteps = raw
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => /^(\d+\.|-\s|•)/.test(line));
+
+        return {
+          codeBlocks,
+          numberedSteps
+        };
+      }
+
+      function renderAiActionItems(text) {
+        const actions = extractAiActions(text);
+        if (!actions.codeBlocks.length && !actions.numberedSteps.length) {
+          return "";
+        }
+
+        const parts = [];
+
+        if (actions.numberedSteps.length) {
+          parts.push(`
+            <div class="ai-section">
+              <div class="ai-section-title">建议步骤</div>
+              <div class="step-list">
+                ${actions.numberedSteps
+                  .map(
+                    (step, index) => `
+                      <div class="step-item">
+                        <div class="step-item-title">步骤 ${index + 1}</div>
+                        <div class="solution-text">${formatSolution(step)}</div>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `);
+        }
+
+        if (actions.codeBlocks.length) {
+          const runnableCommands = actions.codeBlocks.filter((cmd) =>
+            canInlineRunCommand(cmd)
+          );
+          parts.push(`
+            <div class="ai-section">
+              <div class="ai-section-title">建议执行命令</div>
+              ${
+                runnableCommands.length
+                  ? `
+                    <div class="queue-box">
+                      <div class="feedback-actions">
+                        <button class="btn" onclick="runInlineCommandQueue('__CURRENT_STEP__', ${JSON.stringify(runnableCommands)})">顺序执行全部</button>
+                        <button class="btn secondary" onclick="pauseInlineCommandQueue('__CURRENT_STEP__')">暂停队列</button>
+                        <button class="btn secondary" onclick="resumeInlineCommandQueue('__CURRENT_STEP__')">继续队列</button>
+                        <button class="btn secondary" onclick="stopCurrentQueueCommand('__CURRENT_STEP__')">中断当前命令</button>
+                        <button class="btn secondary" onclick="skipInlineCommandQueue('__CURRENT_STEP__')">跳过当前命令</button>
+                        <button class="btn secondary" onclick="cancelInlineCommandQueue('__CURRENT_STEP__')">取消队列</button>
+                        <button class="btn secondary" onclick="clearQueueLog('__CURRENT_STEP__')">清空日志</button>
+                      </div>
+                      <div id="queue-status-__CURRENT_STEP__" class="queue-status">可顺序执行 ${runnableCommands.length} 条 AI 命令。</div>
+                      <div id="queue-log-__CURRENT_STEP__" class="queue-log"><div class="queue-log-line">暂无队列日志</div></div>
+                    </div>
+                  `
+                  : ""
+              }
+              <div class="step-list">
+                ${actions.codeBlocks
+                  .map(
+                    (cmd, index) => `
+                      <div class="step-item">
+                        <div class="step-item-title">命令块 ${index + 1}</div>
+                        <div class="solution-text"><pre>${escapeHtml(cmd)}</pre></div>
+                        <div class="feedback-actions">
+                          <button class="btn secondary" onclick="copyText(${JSON.stringify(cmd)}, '已复制命令块')">复制命令</button>
+                          ${
+                            canInlineRunCommand(cmd)
+                              ? `<button class="btn" onclick="runInlineCommand('__CURRENT_STEP__', ${JSON.stringify(cmd)}, this)">一键执行</button>`
+                              : `<span class="inline-msg">该命令不在一键执行白名单内，可先复制后手动执行。</span>`
+                          }
+                        </div>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `);
+        }
+
+        return parts.join("");
+      }
+
+      function canInlineRunCommand(command) {
+        const trimmed = String(command || "").trim();
+        if (!trimmed || trimmed.includes("\n")) {
+          return false;
+        }
+        return FRONTEND_ALLOWED_COMMAND_PREFIXES.some(
+          (allowed) => trimmed === allowed || trimmed.startsWith(`${allowed} `)
+        );
+      }
+
+      function createInlineRunId(stepId) {
+        return `inline:${stepId}:${Date.now()}:${Math.random().toString(16).slice(2, 8)}`;
+      }
+
+      function updateQueueStatus(stepId, text, cls = "") {
+        const el = document.getElementById(`queue-status-${stepId}`);
+        if (!el) return;
+        el.textContent = text;
+        el.className = `queue-status ${cls}`.trim();
+      }
+
+      function appendQueueLog(stepId, text, cls = "") {
+        if (!state.aiQueueLogs[stepId]) {
+          state.aiQueueLogs[stepId] = [];
+        }
+
+        state.aiQueueLogs[stepId].push({
+          text,
+          cls,
+          ts: new Date().toLocaleTimeString()
+        });
+        renderQueueLog(stepId);
+      }
+
+      function renderQueueLog(stepId) {
+        const el = document.getElementById(`queue-log-${stepId}`);
+        if (!el) return;
+
+        const lines = state.aiQueueLogs[stepId] || [];
+        if (!lines.length) {
+          el.innerHTML = '<div class="queue-log-line">暂无队列日志</div>';
+          return;
+        }
+
+        el.innerHTML = lines
+          .map(
+            (item) =>
+              `<div class="queue-log-line ${item.cls || ""}">[${escapeHtml(item.ts)}] ${escapeHtml(item.text)}</div>`
+          )
+          .join("");
+        el.scrollTop = el.scrollHeight;
+      }
+
+      function clearQueueLog(stepId) {
+        state.aiQueueLogs[stepId] = [];
+        renderQueueLog(stepId);
+      }
+
+      function renderQueueUi(stepId) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+
+        if (!queueEntry) {
+          renderQueueLog(stepId);
+          return;
+        }
+
+        const [, queue] = queueEntry;
+        if (queue.cancelled) {
+          updateQueueStatus(stepId, "队列已取消", "warn");
+        } else if (queue.currentCommand) {
+          updateQueueStatus(stepId, `队列执行中：${queue.currentCommand}`, "");
+        } else {
+          updateQueueStatus(
+            stepId,
+            `队列已启动，准备执行 ${queue.commands.length} 条命令`,
+            ""
+          );
+        }
+        renderQueueLog(stepId);
+      }
+
+      function createQueueId(stepId) {
+        return `queue:${stepId}:${Date.now()}:${Math.random().toString(16).slice(2, 8)}`;
+      }
+
+      function updateInlineRunUi(runId, patch = {}) {
+        const record = state.inlineRuns[runId];
+        if (!record) return;
+        Object.assign(record, patch);
+
+        const button = document.getElementById(record.buttonId);
+        const status = document.getElementById(record.statusId);
+
+        if (button && patch.buttonText) {
+          button.textContent = patch.buttonText;
+        }
+        if (button && typeof patch.disabled === "boolean") {
+          button.disabled = patch.disabled;
+        }
+        if (status && patch.statusText) {
+          status.textContent = patch.statusText;
+        }
+        if (status && patch.statusClass) {
+          status.className = `run-status ${patch.statusClass}`.trim();
+        }
+      }
+
+      function highlightDiff(baseText, compareText) {
+        const compareSet = new Set(
+          String(compareText || "")
+            .toLowerCase()
+            .split(/[\s`"'()[\]{}:;,]+/)
+            .filter(Boolean)
+        );
+
+        return String(baseText || "")
+          .split(/(\s+)/)
+          .map((token) => {
+            if (!token.trim()) {
+              return token;
+            }
+            const normalized = token.toLowerCase();
+            const escaped = escapeHtml(token);
+            return compareSet.has(normalized)
+              ? escaped
+              : `<span class="diff-mark">${escaped}</span>`;
+          })
+          .join("");
+      }
+
+      function renderDiffPreview(currentText, historyText) {
+        return `
+          <div class="diff-box">
+            <div class="diff-label">差异高亮</div>
+            <div class="diff-row">
+              <div class="diff-label">当前报错</div>
+              <div>${highlightDiff(currentText, historyText)}</div>
+            </div>
+            <div class="diff-row">
+              <div class="diff-label">历史报错</div>
+              <div>${highlightDiff(historyText, currentText)}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function getCurrentOpenClawVersion() {
+        return state.systemInfo?.openclaw?.version || "";
+      }
+
+      function getErrorExcerpt(stepId) {
+        const lines = state.stepOutputs[stepId]?.lines || [];
+        return lines.slice(-6).join("\n").slice(0, 500);
+      }
+
+      function getFullErrorText(stepId) {
+        const lines = state.stepOutputs[stepId]?.lines || [];
+        return lines.join("\n").slice(0, 4000);
+      }
+
+      function renderSourceBadge(source) {
+        if (source === "llm") {
+          return '<span class="solution-badge ai">AI 解答</span>';
+        }
+        return '<span class="solution-badge community">报错库</span>';
+      }
+
+      function renderFeedbackHint(key) {
+        const feedback = getStoredFeedback(key);
+        if (!feedback) {
+          return "";
+        }
+
+        if (feedback.status === "helpful") {
+          return '<span class="inline-msg ok">你之前标记过有帮助</span>';
+        }
+
+        if (feedback.status === "not_solved") {
+          return '<span class="inline-msg warn">你之前标记过没解决</span>';
+        }
+
+        return "";
+      }
+
+      async function copyText(text, successMessage = "已复制") {
+        await navigator.clipboard.writeText(String(text || ""));
+        toast(successMessage);
+      }
+
+      function toggleErrorFull(stepId) {
+        const el = document.getElementById(`error-full-${stepId}`);
+        const btn = document.getElementById(`error-toggle-${stepId}`);
+        if (!el || !btn) return;
+        const hidden = el.classList.contains("hidden");
+        el.classList.toggle("hidden", !hidden);
+        btn.textContent = hidden ? "收起完整输出" : "展开完整输出";
+      }
+
+      function toggleErrorResult(stepId) {
+        const el = document.getElementById(`error-result-wrap-${stepId}`);
+        const btn = document.getElementById(`error-result-toggle-${stepId}`);
+        if (!el || !btn) return;
+        const hidden = el.classList.contains("hidden");
+        el.classList.toggle("hidden", !hidden);
+        btn.textContent = hidden ? "收起结果" : "展开结果";
+      }
+
+      function clearErrorResult(stepId) {
+        const resultEl = document.getElementById(`error-result-${stepId}`);
+        const feedbackEl = document.getElementById(`error-feedback-${stepId}`);
+        if (resultEl) {
+          resultEl.innerHTML = `
+            <div class="empty-state">
+              结果已清空。你可以重新查报错库，或再次点击 AI 分析。
+            </div>
+          `;
+        }
+        if (feedbackEl) {
+          feedbackEl.innerHTML = "";
+        }
+      }
+
+      function renderFeedback(stepId, html) {
+        const el = document.getElementById(`error-feedback-${stepId}`);
+        if (!el) return;
+        el.innerHTML = html;
+      }
+
+      async function markResultHelpful(
+        key,
+        btn,
+        text = "感谢反馈，这条结果会优先保留给你参考。",
+        errorId = null
+      ) {
+        setStoredFeedback(key, {
+          status: "helpful",
+          note: text
+        });
+
+        if (errorId) {
+          try {
+            await fetch(`${API_BASE}/errors/${errorId}/feedback`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: "helpful" })
+            });
+          } catch {}
+        }
+
+        btn.disabled = true;
+        btn.textContent = "已反馈有帮助";
+        const parent = btn.parentElement;
+        let msg = parent.querySelector(".inline-msg.feedback-status");
+        if (!msg) {
+          msg = document.createElement("span");
+          msg.className = "inline-msg ok feedback-status";
+          parent.appendChild(msg);
+        }
+        msg.textContent = text;
+      }
+
+      async function markResultNotSolved(key, stepId, source, btn, errorId = null) {
+        setStoredFeedback(key, {
+          status: "not_solved"
+        });
+
+        if (errorId) {
+          try {
+            await fetch(`${API_BASE}/errors/${errorId}/feedback`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: "not_solved" })
+            });
+          } catch {}
+        }
+
+        btn.disabled = true;
+        btn.textContent = "已记录没解决";
+
+        if (source === "library") {
+          renderFeedback(
+            stepId,
+            `
+              <div class="feedback-box">
+                <div class="feedback-title">这批历史记录没有解决你的问题</div>
+                <div class="feedback-text">
+                  建议切换到 AI 分析，AI 会结合当前命令、系统、版本和原始输出重新给出针对性步骤。
+                </div>
+                <div class="feedback-actions">
+                  <button class="btn success" onclick="analyzeWithAI('${stepId}')">改用 AI 分析</button>
+                  <button class="btn secondary" onclick="copyText(${JSON.stringify(getFullErrorText(stepId))}, '已复制当前报错')">复制当前报错</button>
+                </div>
+              </div>
+            `
+          );
+          return;
+        }
+
+        renderFeedback(
+          stepId,
+          `
+            <div class="feedback-box">
+              <div class="feedback-title">AI 结果还没有解决问题</div>
+              <div class="feedback-text">
+                你可以重新分析，或者把当前报错复制出来继续排查；如果你已经找到新解法，也可以稍后保存为新的报错库记录。
+              </div>
+              <div class="feedback-actions">
+                <button class="btn secondary" onclick="analyzeWithAI('${stepId}')">重新分析</button>
+                <button class="btn warn" onclick="searchLibrary('${stepId}')">重新查报错库</button>
+                <button class="btn secondary" onclick="copyText(${JSON.stringify(getFullErrorText(stepId))}, '已复制当前报错')">复制当前报错</button>
+              </div>
+            </div>
+          `
+        );
+      }
+
+      function changeSearchSort(stepId, sort) {
+        setSearchPref(stepId, { sort, limit: 5 });
+        searchLibrary(stepId);
+      }
+
+      function changeSearchSource(stepId, source) {
+        setSearchPref(stepId, { source, limit: 5 });
+        searchLibrary(stepId);
+      }
+
+      function toggleVersionFilter(stepId, checked) {
+        setSearchPref(stepId, { sameVersionOnly: checked, limit: 5 });
+        searchLibrary(stepId);
+      }
+
+      function toggleHighVotesFilter(stepId, checked) {
+        setSearchPref(stepId, { minVotes: checked ? 1 : 0, limit: 5 });
+        searchLibrary(stepId);
+      }
+
+      function resetSearchFilters(stepId) {
+        state.searchPrefs[stepId] = {
+          sort: "best",
+          limit: 5,
+          source: "all",
+          sameVersionOnly: false,
+          minVotes: 0
+        };
+        searchLibrary(stepId);
+      }
+
+      function setInstallMode(mode) {
+        state.installMode = mode === "mirror" ? "mirror" : "official";
+        saveInstallMode();
+        renderStepsMode();
+        renderSteps();
+      }
+
+      function isStepNoteExpanded(stepId) {
+        return Boolean(state.stepNotePrefs[stepId]);
+      }
+
+      function toggleStepNote(stepId) {
+        state.stepNotePrefs[stepId] = !isStepNoteExpanded(stepId);
+        saveStepNotePrefs();
+        renderSteps();
+      }
+
+      function renderCommonActions() {
+        const container = document.getElementById("common-actions");
+        if (!container) return;
+
+        container.innerHTML = COMMON_ACTIONS
+          .map(
+            (action) => `
+              <div class="common-action-card">
+                <div class="common-action-title">
+                  <div>
+                    <h3>${escapeHtml(action.title)}</h3>
+                    <div class="common-action-desc">${escapeHtml(action.description)}</div>
+                  </div>
+                </div>
+                <div class="step-command">${escapeHtml(action.cmd)}</div>
+                <div class="step-actions">
+                  <button class="btn ${action.tone === "secondary" ? "secondary" : action.tone}" onclick="runCommonAction('${action.id}')">▶ 执行</button>
+                  <button class="btn secondary" onclick="copyCommonAction('${action.id}')">📋 复制</button>
+                  <button class="btn secondary" onclick="stopCommonAction('${action.id}')">停止</button>
+                </div>
+                <div class="terminal" id="term-common-${action.id}"></div>
+              </div>
+            `
+          )
+          .join("");
+
+        COMMON_ACTIONS.forEach((action) => {
+          renderTerminal(getCommonActionRunId(action.id));
+        });
+      }
+
+      function renderStepsMode() {
+        const officialBtn = document.getElementById("mode-official");
+        const mirrorBtn = document.getElementById("mode-mirror");
+        if (!officialBtn || !mirrorBtn) return;
+        officialBtn.classList.toggle("active", state.installMode === "official");
+        mirrorBtn.classList.toggle("active", state.installMode === "mirror");
+      }
+
+      function loadMoreSimilar(stepId) {
+        const current = getSearchPref(stepId);
+        setSearchPref(stepId, {
+          limit: Math.min((current.limit || 5) + 5, 50)
+        });
+        searchLibrary(stepId);
+      }
+
+      function runInlineCommand(stepId, command, button) {
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          toast("Bridge 未连接，当前无法一键执行");
+          return;
+        }
+
+        if (!canInlineRunCommand(command)) {
+          toast("该命令不在一键执行白名单内");
+          return;
+        }
+
+        const runId = createInlineRunId(stepId);
+        const buttonId =
+          button.id || `inline-run-btn-${Math.random().toString(16).slice(2, 8)}`;
+        button.id = buttonId;
+        let statusEl = button.parentElement?.querySelector(".run-status");
+        if (!statusEl) {
+          statusEl = document.createElement("span");
+          statusEl.className = "run-status";
+          button.parentElement?.appendChild(statusEl);
+        }
+        const statusId =
+          statusEl.id || `inline-run-status-${Math.random().toString(16).slice(2, 8)}`;
+        statusEl.id = statusId;
+        state.inlineRuns[runId] = {
+          stepId,
+          buttonId,
+          statusId,
+          command
+        };
+
+        appendLine(stepId, `[AI 步骤] 执行: ${command}`, "ok");
+        updateInlineRunUi(runId, {
+          disabled: true,
+          buttonText: "发送中",
+          statusText: "命令已发送到 Bridge",
+          statusClass: ""
+        });
+        state.ws.send(JSON.stringify({ id: runId, type: "run", command }));
+      }
+
+      function runInlineCommandFromQueue(queueId, stepId, command) {
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          updateQueueStatus(stepId, "Bridge 未连接，队列已停止", "warn");
+          appendQueueLog(stepId, "Bridge 未连接，无法继续队列", "warn");
+          return;
+        }
+
+        const runId = createInlineRunId(stepId);
+        const queue = state.aiQueues[queueId];
+        state.inlineRuns[runId] = {
+          stepId,
+          buttonId: "",
+          statusId: "",
+          command,
+          queueId
+        };
+        if (queue) {
+          queue.currentRunId = runId;
+          queue.currentCommand = command;
+          queue.skipRequested = false;
+        }
+
+        appendLine(stepId, `[AI 队列] 执行: ${command}`, "ok");
+        updateQueueStatus(stepId, `队列执行中：${command}`, "");
+        appendQueueLog(stepId, `开始执行：${command}`);
+        state.ws.send(JSON.stringify({ id: runId, type: "run", command }));
+      }
+
+      function processNextInlineQueue(queueId) {
+        const queue = state.aiQueues[queueId];
+        if (!queue || queue.cancelled) {
+          return;
+        }
+
+        if (queue.paused) {
+          updateQueueStatus(queue.stepId, "队列已暂停，等待继续", "warn");
+          appendQueueLog(queue.stepId, "队列暂停，等待继续", "warn");
+          return;
+        }
+
+        if (queue.index >= queue.commands.length) {
+          updateQueueStatus(queue.stepId, `队列执行完成，共 ${queue.commands.length} 条`, "ok");
+          appendQueueLog(queue.stepId, `队列完成，共执行 ${queue.commands.length} 条命令`, "ok");
+          delete state.aiQueues[queueId];
+          return;
+        }
+
+        const command = queue.commands[queue.index];
+        queue.index += 1;
+        runInlineCommandFromQueue(queueId, queue.stepId, command);
+      }
+
+      function runInlineCommandQueue(stepId, commands) {
+        const runnable = (commands || []).filter((cmd) => canInlineRunCommand(cmd));
+        if (!runnable.length) {
+          toast("没有可执行的 AI 命令");
+          return;
+        }
+
+        cancelInlineCommandQueue(stepId, false);
+        const queueId = createQueueId(stepId);
+        state.aiQueues[queueId] = {
+          stepId,
+          commands: runnable,
+          index: 0,
+          cancelled: false,
+          paused: false,
+          currentRunId: null,
+          currentCommand: "",
+          skipRequested: false
+        };
+        updateQueueStatus(stepId, `队列已启动，准备执行 ${runnable.length} 条命令`, "");
+        appendQueueLog(stepId, `队列启动，共 ${runnable.length} 条命令`);
+        processNextInlineQueue(queueId);
+      }
+
+      function pauseInlineCommandQueue(stepId) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+        if (!queueEntry) {
+          updateQueueStatus(stepId, "当前没有运行中的队列", "");
+          return;
+        }
+
+        const [, queue] = queueEntry;
+        queue.paused = true;
+        updateQueueStatus(
+          stepId,
+          queue.currentRunId
+            ? "队列已暂停，当前命令结束后不会继续"
+            : "队列已暂停",
+          "warn"
+        );
+        appendQueueLog(stepId, "队列已暂停", "warn");
+      }
+
+      function resumeInlineCommandQueue(stepId) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+        if (!queueEntry) {
+          updateQueueStatus(stepId, "当前没有运行中的队列", "");
+          return;
+        }
+
+        const [queueId, queue] = queueEntry;
+        queue.paused = false;
+        appendQueueLog(stepId, "队列已继续", "ok");
+
+        if (queue.currentRunId) {
+          updateQueueStatus(stepId, `队列已继续，等待当前命令完成：${queue.currentCommand}`, "");
+          return;
+        }
+
+        updateQueueStatus(stepId, "队列已继续，准备执行下一条", "");
+        processNextInlineQueue(queueId);
+      }
+
+      function stopCurrentQueueCommand(stepId) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+        if (!queueEntry) {
+          updateQueueStatus(stepId, "当前没有运行中的队列", "");
+          return;
+        }
+
+        const [, queue] = queueEntry;
+        if (!queue.currentRunId) {
+          updateQueueStatus(stepId, "当前没有正在执行的命令", "");
+          return;
+        }
+
+        queue.paused = true;
+        updateQueueStatus(stepId, `正在中断：${queue.currentCommand}`, "warn");
+        appendQueueLog(stepId, `请求中断当前命令：${queue.currentCommand}`, "warn");
+        state.ws.send(JSON.stringify({ id: queue.currentRunId, type: "stop" }));
+      }
+
+      function stopStepCommand(stepId) {
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          toast("Bridge 未连接，当前无法中断命令");
+          return;
+        }
+        state.ws.send(JSON.stringify({ id: stepId, type: "stop" }));
+      }
+
+      function skipInlineCommandQueue(stepId) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+        if (!queueEntry) {
+          updateQueueStatus(stepId, "当前没有运行中的队列", "");
+          return;
+        }
+
+        const [, queue] = queueEntry;
+        if (!queue.currentRunId) {
+          updateQueueStatus(stepId, "当前没有正在执行的命令，下一条会自动继续", "");
+          return;
+        }
+
+        queue.skipRequested = true;
+        updateQueueStatus(
+          stepId,
+          `已标记跳过：${queue.currentCommand}，等待当前命令结束后继续`,
+          "warn"
+        );
+        appendQueueLog(stepId, `已标记跳过当前命令：${queue.currentCommand}`, "warn");
+      }
+
+      function cancelInlineCommandQueue(stepId, announce = true) {
+        const queueEntry = Object.entries(state.aiQueues).find(
+          ([, queue]) => queue.stepId === stepId
+        );
+        if (!queueEntry) {
+          if (announce) {
+            updateQueueStatus(stepId, "当前没有运行中的队列", "");
+          }
+          return;
+        }
+
+        const [queueId, queue] = queueEntry;
+        queue.cancelled = true;
+        delete state.aiQueues[queueId];
+        updateQueueStatus(stepId, "队列已取消", "warn");
+        appendQueueLog(stepId, "队列已取消", "warn");
+      }
+
+      function markStepDone(stepId) {
+        localStorage.setItem(`step_${stepId}_status`, "done");
+        renderSteps();
+      }
+
+      function isStepDone(stepId) {
+        return localStorage.getItem(`step_${stepId}_status`) === "done";
+      }
+
+      function switchOS(nextOS) {
+        state.os = nextOS;
+        document.getElementById("workspace-input").value = getWorkspaceDefault();
+        renderHeader();
+        renderStepsMode();
+        renderSteps();
+        loadConfigPaths();
+      }
+
+      function renderHeader() {
+        document.getElementById("detected-os-chip").textContent =
+          `当前系统：${state.os === "windows" ? "Windows" : "macOS"}`;
+        const bridgeStatus = document.getElementById("bridge-status");
+        const bridgeNotice = document.getElementById("bridge-notice");
+        bridgeStatus.textContent = state.bridgeReady ? "Bridge 已连接" : "Bridge 未连接";
+        bridgeStatus.className = `status ${state.bridgeReady ? "ok" : "bad"}`;
+
+        if (state.bridgeReady) {
+          bridgeNotice.className = "notice hidden";
+          bridgeNotice.innerHTML = "";
+        } else {
+          bridgeNotice.className = "notice";
+          bridgeNotice.innerHTML =
+            '未检测到本地 Bridge 服务。你仍然可以复制命令手动执行。<br>如果要启用一键运行和一键写入，请先运行 <span class="mono">npm install</span> 和 <span class="mono">node bridge.js</span>。';
+        }
+      }
+
+      function renderSystemInfo() {
+        const versionEl = document.getElementById("info-version");
+        const gatewayEl = document.getElementById("info-gateway");
+        const gatewayDetailEl = document.getElementById("info-gateway-detail");
+        const gatewayUrlEl = document.getElementById("info-gateway-url");
+        const storageEl = document.getElementById("info-storage");
+        const configPathEl = document.getElementById("info-config-path");
+
+        if (!state.systemInfo) {
+          versionEl.textContent = "未获取";
+          gatewayEl.textContent = "未获取";
+          gatewayDetailEl.textContent = "未获取";
+          gatewayUrlEl.textContent = "未获取";
+          storageEl.textContent = "未获取";
+          configPathEl.textContent = "未获取";
+          return;
+        }
+
+        const { openclaw, gateway, storageMode, configPath } = state.systemInfo;
+        versionEl.textContent = openclaw?.installed ? openclaw.version || "已安装" : "未检测到";
+        gatewayEl.textContent = gateway?.summary || (gateway?.ok ? "可用" : "未就绪");
+        gatewayDetailEl.textContent =
+          gateway?.output?.split("\n")[0] || gateway?.command || "未检测到";
+        gatewayUrlEl.innerHTML = gateway?.dashboardUrl
+          ? `<a class="link-btn" href="${gateway.dashboardUrl}" target="_blank">${gateway.dashboardUrl}</a>`
+          : "未检测到";
+        storageEl.textContent = storageMode === "sqlite" ? "SQLite" : "JSON fallback";
+        configPathEl.textContent = configPath || "未检测到";
+      }
+
+      function syncSystemInfoToSteps() {
+        const info = state.systemInfo;
+        if (!info) return;
+
+        if (info.openclaw?.installed) {
+          localStorage.setItem("step_version_status", "done");
+          if (info.openclaw.version) {
+            const output = state.stepOutputs.version || {
+              lines: [],
+              exitCode: 0,
+              terminal: []
+            };
+            const alreadyShown = output.terminal.some(
+              (item) => item.text === info.openclaw.version
+            );
+            if (!alreadyShown) {
+              state.stepOutputs.version = output;
+              appendLine("version", info.openclaw.version);
+            }
+          }
+        }
+
+        if (info.gateway?.ok) {
+          localStorage.setItem("step_gateway_status", "done");
+        }
+
+        renderSteps();
+      }
+
+      function renderSteps() {
+        const container = document.getElementById("steps");
+        container.innerHTML = getSteps()
+          .map((step, index) => {
+            const done = isStepDone(step.id);
+            const noteExpanded = isStepNoteExpanded(step.id);
+            return `
+              <div class="step-card ${done ? "done" : ""}" id="step-${step.id}">
+                <div class="step-header">
+                  <div>
+                    <h3>步骤 ${index + 1}：${step.title}</h3>
+                    <div class="muted">${done ? "已完成，可重复执行" : "未完成"}</div>
+                    ${
+                      step.note
+                        ? `
+                          <button class="btn secondary step-note-toggle" onclick="toggleStepNote('${step.id}')">
+                            ${noteExpanded ? "收起说明" : "展开说明"}
+                          </button>
+                          <div class="step-note ${noteExpanded ? "" : "hidden"}">${escapeHtml(step.note)}</div>
+                        `
+                        : ""
+                    }
+                  </div>
+                  <div>
+                    ${step.badge ? `<div class="step-badge">${escapeHtml(step.badge)}</div>` : ""}
+                    <div class="status ${done ? "ok" : ""}" style="margin-top: 8px;">${done ? "已完成" : "待执行"}</div>
+                  </div>
+                </div>
+                <div class="step-command">${escapeHtml(step.cmd)}</div>
+                <div class="step-actions" style="margin-top: 12px;">
+                  <button class="btn" onclick="runStep('${step.id}')">▶ 运行</button>
+                  <button class="btn secondary" onclick="copyCommand('${step.id}')">📋 复制</button>
+                  <button class="btn secondary" onclick="stopStepCommand('${step.id}')">停止</button>
+                </div>
+                <div class="terminal" id="term-${step.id}"></div>
+              </div>
+            `;
+          })
+          .join("");
+        renderAllTerminals();
+      }
+
+      function getStepById(stepId) {
+        return getSteps().find((step) => step.id === stepId);
+      }
+
+      function appendLine(stepId, text, cls = "") {
+        if (!state.stepOutputs[stepId]) {
+          state.stepOutputs[stepId] = { lines: [], exitCode: null, terminal: [] };
+        }
+
+        state.stepOutputs[stepId].terminal.push({
+          text,
+          cls
+        });
+
+        const term = getTerminalElement(stepId);
+        if (!term) return;
+        const line = document.createElement("div");
+        line.className = `term-line ${cls}`.trim();
+        line.textContent = text;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+      }
+
+      function renderTerminal(stepId) {
+        const term = getTerminalElement(stepId);
+        if (!term) return;
+
+        const terminalLines = state.stepOutputs[stepId]?.terminal || [];
+        term.innerHTML = "";
+
+        terminalLines.forEach((item) => {
+          const line = document.createElement("div");
+          line.className = `term-line ${item.cls || ""}`.trim();
+          line.textContent = item.text;
+          term.appendChild(line);
+        });
+
+        term.scrollTop = term.scrollHeight;
+      }
+
+      function renderAllTerminals() {
+        getSteps().forEach((step) => {
+          renderTerminal(step.id);
+        });
+        COMMON_ACTIONS.forEach((action) => {
+          renderTerminal(getCommonActionRunId(action.id));
+        });
+      }
+
+      function connectWS() {
+        const ws = new WebSocket(WS_URL);
+        state.ws = ws;
+
+        ws.onopen = () => {
+          state.bridgeReady = true;
+          renderHeader();
+        };
+
+        ws.onclose = () => {
+          state.bridgeReady = false;
+          renderHeader();
+          setTimeout(connectWS, 1500);
+        };
+
+        ws.onerror = () => {
+          state.bridgeReady = false;
+          renderHeader();
+        };
+
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          handleBridgeMsg(data);
+        };
+      }
+
+      function handleBridgeMsg(message) {
+        const inlineRun = state.inlineRuns[message.id];
+        const stepId = inlineRun?.stepId || message.id;
+        if (!stepId) return;
+
+        if (!state.stepOutputs[stepId]) {
+          state.stepOutputs[stepId] = { lines: [], exitCode: null, terminal: [] };
+        }
+
+        if (message.type === "started") {
+          if (inlineRun) {
+            updateInlineRunUi(message.id, {
+              buttonText: "执行中",
+              statusText: "命令开始执行",
+              statusClass: ""
+            });
+          }
+          appendLine(stepId, message.data);
+          return;
+        }
+
+        if (message.type === "stopping") {
+          appendLine(stepId, message.data, "warn");
+          if (inlineRun) {
+            updateInlineRunUi(message.id, {
+              disabled: true,
+              buttonText: "中断中",
+              statusText: "正在中断命令",
+              statusClass: "warn"
+            });
+            if (inlineRun.queueId) {
+              updateQueueStatus(stepId, "正在中断当前命令，队列已暂停", "warn");
+              appendQueueLog(stepId, `正在中断：${inlineRun.command}`, "warn");
+            }
+          }
+          return;
+        }
+
+        if (message.type === "stdout" || message.type === "stderr") {
+          const text = String(message.data || "").trim();
+          if (!text) return;
+          state.stepOutputs[stepId].lines.push(text);
+          appendLine(stepId, text, message.type === "stderr" ? "warn" : "");
+          if (inlineRun) {
+            updateInlineRunUi(message.id, {
+              buttonText: "执行中",
+              statusText: message.type === "stderr" ? "收到错误输出" : "收到命令输出",
+              statusClass: message.type === "stderr" ? "warn" : ""
+            });
+          }
+          return;
+        }
+
+        if (message.type === "stopped") {
+          appendLine(stepId, "命令已中断", "warn");
+          if (inlineRun) {
+            updateInlineRunUi(message.id, {
+              disabled: false,
+              buttonText: "重新执行",
+              statusText: "命令已中断",
+              statusClass: "warn"
+            });
+            if (inlineRun.queueId) {
+              const queue = state.aiQueues[inlineRun.queueId];
+              if (queue) {
+                queue.currentRunId = null;
+                queue.currentCommand = "";
+                updateQueueStatus(stepId, "当前命令已中断，队列已暂停，可继续", "warn");
+                appendQueueLog(stepId, `命令已中断：${inlineRun.command}`, "warn");
+              }
+            }
+            delete state.inlineRuns[message.id];
+          }
+          return;
+        }
+
+        if (message.type === "error") {
+          appendLine(stepId, message.data, "warn");
+          if (inlineRun) {
+            updateInlineRunUi(message.id, {
+              disabled: false,
+              buttonText: "重试执行",
+              statusText: message.data,
+              statusClass: "warn"
+            });
+            if (inlineRun.queueId) {
+              const queue = state.aiQueues[inlineRun.queueId];
+              if (queue?.skipRequested) {
+                appendQueueLog(stepId, `已跳过失败命令：${inlineRun.command}`, "warn");
+                updateQueueStatus(stepId, `已跳过失败命令，继续下一条`, "warn");
+                  queue.currentRunId = null;
+                  queue.currentCommand = "";
+                processNextInlineQueue(inlineRun.queueId);
+              } else {
+                updateQueueStatus(stepId, `队列执行失败：${message.data}`, "warn");
+                appendQueueLog(stepId, `队列失败：${inlineRun.command}`, "warn");
+                delete state.aiQueues[inlineRun.queueId];
+              }
+            }
+          }
+          if (!isCommonActionId(stepId)) {
+            showErrorPanel(stepId);
+          }
+          return;
+        }
+
+        if (message.type === "exit") {
+          const code = Number(message.code ?? 1);
+          state.stepOutputs[stepId].exitCode = code;
+          if (code === 0) {
+            appendLine(stepId, "命令执行完成", "ok");
+            if (!inlineRun && !isCommonActionId(stepId)) {
+              markStepDone(stepId);
+            }
+            if (inlineRun) {
+              updateInlineRunUi(message.id, {
+                disabled: false,
+                buttonText: "再次执行",
+                statusText: "执行成功",
+                statusClass: "ok"
+              });
+              if (inlineRun.queueId) {
+                const queue = state.aiQueues[inlineRun.queueId];
+                if (queue?.skipRequested) {
+                  appendQueueLog(stepId, `已跳过命令：${inlineRun.command}`, "warn");
+                  updateQueueStatus(stepId, "已跳过当前命令，继续下一条", "warn");
+                  queue.currentRunId = null;
+                  queue.currentCommand = "";
+                } else {
+                  appendQueueLog(stepId, `执行成功：${inlineRun.command}`, "ok");
+                  if (queue) {
+                    queue.currentRunId = null;
+                    queue.currentCommand = "";
+                  }
+                }
+                if (queue?.paused) {
+                  updateQueueStatus(stepId, "队列已暂停，可继续", "warn");
+                } else {
+                  processNextInlineQueue(inlineRun.queueId);
+                }
+              }
+            }
+            if (
+              isCommonActionId(stepId) ||
+              stepId === "openclaw" ||
+              stepId === "version" ||
+              stepId === "gateway"
+            ) {
+              loadSystemInfo();
+            }
+          } else {
+            appendLine(stepId, `命令退出码: ${code}`, "warn");
+            if (inlineRun) {
+              updateInlineRunUi(message.id, {
+                disabled: false,
+                buttonText: "重试执行",
+                statusText: `执行失败，退出码 ${code}`,
+                statusClass: "warn"
+              });
+              if (inlineRun.queueId) {
+                const queue = state.aiQueues[inlineRun.queueId];
+                if (queue?.skipRequested) {
+                  appendQueueLog(stepId, `已跳过失败命令：${inlineRun.command}`, "warn");
+                  updateQueueStatus(stepId, "已跳过当前命令，继续下一条", "warn");
+                  queue.currentRunId = null;
+                  queue.currentCommand = "";
+                  if (queue.paused) {
+                    updateQueueStatus(stepId, "队列已暂停，可继续", "warn");
+                  } else {
+                    processNextInlineQueue(inlineRun.queueId);
+                  }
+                } else {
+                  updateQueueStatus(stepId, `队列执行失败，退出码 ${code}`, "warn");
+                  appendQueueLog(
+                    stepId,
+                    `队列失败：${inlineRun.command}（退出码 ${code}）`,
+                    "warn"
+                  );
+                  delete state.aiQueues[inlineRun.queueId];
+                }
+              }
+            }
+          }
+          if (inlineRun) {
+            delete state.inlineRuns[message.id];
+          }
+          const joined = state.stepOutputs[stepId].lines.join("\n");
+          if (!isCommonActionId(stepId) && (code !== 0 || hasErrorText(joined))) {
+            showErrorPanel(stepId);
+          }
+        }
+      }
+
+      function hasErrorText(text) {
+        const lower = String(text);
+        return [
+          "error",
+          "Error",
+          "ERROR",
+          "ENOENT",
+          "EACCES",
+          "EPERM",
+          "failed",
+          "Failed",
+          "not found",
+          "not recognized",
+          "permission denied",
+          "npm ERR"
+        ].some((token) => lower.includes(token));
+      }
+
+      function runStep(stepId) {
+        const step = getStepById(stepId);
+        if (!step) return;
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          toast("Bridge 未连接，已保留复制按钮供手动执行");
+          return;
+        }
+        state.stepOutputs[stepId] = { lines: [], exitCode: null, terminal: [] };
+        renderTerminal(stepId);
+        state.ws.send(JSON.stringify({ id: stepId, type: "run", command: step.cmd }));
+      }
+
+      async function copyCommand(stepId) {
+        const step = getStepById(stepId);
+        if (!step) return;
+        await navigator.clipboard.writeText(step.cmd);
+        toast("命令已复制");
+      }
+
+      function runCommonAction(actionId) {
+        const action = getCommonActionById(actionId);
+        if (!action) return;
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          toast("Bridge 未连接，已保留复制按钮供手动执行");
+          return;
+        }
+
+        const runId = getCommonActionRunId(actionId);
+        state.stepOutputs[runId] = { lines: [], exitCode: null, terminal: [] };
+        renderTerminal(runId);
+        state.ws.send(JSON.stringify({ id: runId, type: "run", command: action.cmd }));
+      }
+
+      async function copyCommonAction(actionId) {
+        const action = getCommonActionById(actionId);
+        if (!action) return;
+        await navigator.clipboard.writeText(action.cmd);
+        toast("命令已复制");
+      }
+
+      function stopCommonAction(actionId) {
+        if (!state.bridgeReady || !state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          toast("Bridge 未连接，当前无法中断命令");
+          return;
+        }
+
+        state.ws.send(JSON.stringify({ id: getCommonActionRunId(actionId), type: "stop" }));
+      }
+
+      async function loadConfigPaths() {
+        try {
+          const res = await fetch(`${API_BASE}/config/paths`);
+          const data = await res.json();
+          state.configPaths = data.paths || [];
+          renderConfigPathHint();
+        } catch {
+          state.configPaths = [];
+          renderConfigPathHint();
+        }
+      }
+
+      function renderConfigPathHint() {
+        const el = document.getElementById("config-path-hint");
+        if (!state.configPaths.length) {
+          el.innerHTML = "未探测到本机可写配置路径，可下载后手动替换。";
+          return;
+        }
+        el.innerHTML = state.configPaths
+          .map((item) => {
+            const suffix = item.exists ? "已有旧文件，会先备份" : "将新建配置文件";
+            return `<div>推荐路径：${escapeHtml(item.path)}，${suffix}</div>`;
+          })
+          .join("");
+      }
+
+      function renderConfigWriteResult(html = "") {
+        document.getElementById("config-write-result").innerHTML = html;
+      }
+
+      function getConfigPayload() {
+        return {
+          apiKey: document.getElementById("api-key-input").value.trim(),
+          baseUrl: document.getElementById("base-url-input").value.trim(),
+          model: document.getElementById("model-input").value.trim(),
+          workspace: document.getElementById("workspace-input").value.trim()
+        };
+      }
+
+      async function generateConfig() {
+        const payload = getConfigPayload();
+        if (!payload.apiKey) {
+          toast("请先输入 API Key");
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/config/preview`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "生成配置失败");
+          state.generatedConfigText = data.configText;
+          renderConfigWriteResult("");
+          document.getElementById("config-preview").textContent = data.configText;
+          await loadConfigPaths();
+          toast("配置文件已生成");
+        } catch (error) {
+          toast(error.message);
+        }
+      }
+
+      function downloadConfigFile() {
+        if (!state.generatedConfigText) {
+          toast("请先生成配置文件");
+          return;
+        }
+
+        const blob = new Blob([state.generatedConfigText], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "openclaw.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        toast("已下载 openclaw.json");
+      }
+
+      async function replaceConfigFile() {
+        const payload = getConfigPayload();
+        if (!payload.apiKey) {
+          toast("请先输入 API Key");
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/config/write`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, backup: true })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            if (data.fallbackPath) {
+              renderConfigWriteResult(
+                `自动写入失败。已生成临时配置文件，请手动替换。<br><a class="link-btn" href="${data.fallbackUrl || "#"}" target="_blank">下载生成文件</a><br><span class="mono">${escapeHtml(data.fallbackPath)}</span>`
+              );
+            }
+            const detail = data.fallbackPath
+              ? `${data.error}。已生成临时配置文件，请手动替换。`
+              : data.error || "写入配置失败";
+            throw new Error(detail);
+          }
+          renderConfigWriteResult(
+            `配置写入成功：<span class="mono">${escapeHtml(data.path)}</span>${
+              data.backupPath ? `<br>备份文件：<span class="mono">${escapeHtml(data.backupPath)}</span>` : ""
+            }`
+          );
+          const suffix = data.backupPath ? `，已备份到 ${data.backupPath}` : "";
+          toast(`配置已写入: ${data.path}${suffix}`);
+          await loadConfigPaths();
+          await loadSystemInfo();
+        } catch (error) {
+          toast(error.message);
+        }
+      }
+
+      function showErrorPanel(stepId) {
+        const parent = document.getElementById(`step-${stepId}`);
+        const old = document.getElementById(`error-panel-${stepId}`);
+        if (old) old.remove();
+        const step = getStepById(stepId);
+        const snippet = escapeHtml(getErrorExcerpt(stepId) || "暂无可用输出");
+
+        const panel = document.createElement("div");
+        panel.id = `error-panel-${stepId}`;
+        panel.className = "error-panel";
+        panel.innerHTML = `
+          <div class="error-head">
+            检测到报错，建议先查报错库，再使用 AI 分析。
+            <div class="error-sub">
+              命令：${escapeHtml(step?.cmd || "未知命令")}
+            </div>
+          </div>
+          <div class="error-body">
+            <div class="actions">
+              <button class="btn warn" onclick="searchLibrary('${stepId}')">查报错库</button>
+              <button class="btn success" onclick="analyzeWithAI('${stepId}')">AI 分析</button>
+              <button class="btn secondary" id="error-result-toggle-${stepId}" onclick="toggleErrorResult('${stepId}')">收起结果</button>
+              <button class="btn secondary" onclick="clearErrorResult('${stepId}')">清空结果</button>
+              <button class="btn secondary" id="error-toggle-${stepId}" onclick="toggleErrorFull('${stepId}')">展开完整输出</button>
+              <button class="btn secondary" onclick="copyText(${JSON.stringify(getFullErrorText(stepId))}, '已复制原始报错')">复制原始报错</button>
+            </div>
+            <div class="error-snippet">${snippet}</div>
+            <div id="error-full-${stepId}" class="error-full hidden">${escapeHtml(getFullErrorText(stepId) || "暂无完整输出")}</div>
+            <div id="error-result-wrap-${stepId}">
+              <div id="error-result-${stepId}" style="margin-top: 12px;"></div>
+              <div id="error-feedback-${stepId}"></div>
+            </div>
+          </div>
+        `;
+        parent.appendChild(panel);
+        setSearchPref(stepId, getSearchPref(stepId));
+        searchLibrary(stepId);
+      }
+
+      async function searchLibrary(stepId) {
+        const output = state.stepOutputs[stepId];
+        const resultEl = document.getElementById(`error-result-${stepId}`);
+        renderFeedback(stepId, "");
+        if (!output || !resultEl) return;
+        const searchPref = getSearchPref(stepId);
+        resultEl.innerHTML = `
+          <div class="result-toolbar">
+            <div class="result-title">正在搜索报错库</div>
+            <div class="result-status">提取错误指纹并匹配中...</div>
+          </div>
+        `;
+
+        try {
+          const query = output.lines.join("\n").slice(0, 1000);
+          const version = getCurrentOpenClawVersion();
+          const res = await fetch(
+            `${API_BASE}/errors/search?query=${encodeURIComponent(query)}&os=${encodeURIComponent(
+              state.os === "windows" ? "Windows" : "macOS"
+            )}&version=${encodeURIComponent(version)}&limit=${encodeURIComponent(searchPref.limit)}&sort=${encodeURIComponent(searchPref.sort)}`
+          );
+          const data = await res.json();
+          if (!Array.isArray(data) || !data.length) {
+            resultEl.innerHTML = `
+              <div class="result-toolbar">
+                <div class="result-title">报错库暂无匹配</div>
+                <div class="result-actions">
+                  <select class="compact-select" onchange="changeSearchSort('${stepId}', this.value)">
+                    <option value="best" ${searchPref.sort === "best" ? "selected" : ""}>最相关</option>
+                    <option value="votes" ${searchPref.sort === "votes" ? "selected" : ""}>点赞最多</option>
+                    <option value="latest" ${searchPref.sort === "latest" ? "selected" : ""}>最新记录</option>
+                  </select>
+                  <button class="btn secondary" onclick="resetSearchFilters('${stepId}')">重置筛选</button>
+                </div>
+              </div>
+              <div class="empty-state">
+                没有找到足够接近的历史记录。建议点击“AI 分析”获取针对当前输出的解释和解决步骤。
+              </div>
+            `;
+            return;
+          }
+
+          resultEl.innerHTML = `
+            <div class="result-toolbar">
+              <div class="result-title">找到 ${data.length} 条可能有用的结果</div>
+              <div class="result-actions">
+                <select class="compact-select" onchange="changeSearchSort('${stepId}', this.value)">
+                  <option value="best" ${searchPref.sort === "best" ? "selected" : ""}>最相关</option>
+                  <option value="votes" ${searchPref.sort === "votes" ? "selected" : ""}>点赞最多</option>
+                  <option value="latest" ${searchPref.sort === "latest" ? "selected" : ""}>最新记录</option>
+                </select>
+                <select class="compact-select" onchange="changeSearchSource('${stepId}', this.value)">
+                  <option value="all" ${searchPref.source === "all" ? "selected" : ""}>全部来源</option>
+                  <option value="llm" ${searchPref.source === "llm" ? "selected" : ""}>仅 AI</option>
+                  <option value="community" ${searchPref.source === "community" ? "selected" : ""}>仅报错库</option>
+                </select>
+                <label class="compact-check">
+                  <input type="checkbox" ${searchPref.sameVersionOnly ? "checked" : ""} onchange="toggleVersionFilter('${stepId}', this.checked)" />
+                  仅当前版本
+                </label>
+                <label class="compact-check">
+                  <input type="checkbox" ${searchPref.minVotes > 0 ? "checked" : ""} onchange="toggleHighVotesFilter('${stepId}', this.checked)" />
+                  仅高票
+                </label>
+                <button class="btn secondary" onclick="resetSearchFilters('${stepId}')">重置筛选</button>
+                <button class="btn secondary" onclick="loadMoreSimilar('${stepId}')">查看更多相似记录</button>
+              </div>
+            </div>
+            ${data
+            .map(
+              (item) => {
+                const feedbackKey = makeFeedbackKey("library", item.id);
+                const feedback = getStoredFeedback(feedbackKey);
+                const currentDiffText = getErrorExcerpt(stepId) || getFullErrorText(stepId);
+                return `
+                <div class="solution-card">
+                  <div class="solution-meta">
+                    <div>${renderSourceBadge(item.source || "community")}</div>
+                    <div>👍 ${item.votes || 0} · 有帮助 ${item.helpful_count || 0} · 没解决 ${item.not_solved_count || 0}</div>
+                  </div>
+                  <div class="solution-summary">
+                    <div>系统：${escapeHtml(item.os || "通用")}</div>
+                    <div>版本：${escapeHtml(item.openclaw_version || "未知")}</div>
+                    <div>命令：<span class="mono">${escapeHtml(item.command || "未知命令")}</span></div>
+                  </div>
+                  <div class="solution-text">${formatSolution(item.solution || "")}</div>
+                  ${renderDiffPreview(currentDiffText, item.error_pattern || "")}
+                  <div class="solution-footer">
+                    <button class="btn secondary" onclick="copyText(${JSON.stringify(String(item.solution || ""))}, '已复制解决方案')">复制方案</button>
+                    <button class="btn secondary" onclick="voteError(${item.id}, this)">👍 标记有用</button>
+                    <button class="btn secondary" ${feedback?.status === "helpful" ? "disabled" : ""} onclick="markResultHelpful('${feedbackKey}', this, '感谢反馈，这条记录已记为有帮助。', ${item.id})">${feedback?.status === "helpful" ? "已反馈有帮助" : "有帮助"}</button>
+                    <button class="btn secondary" ${feedback?.status === "not_solved" ? "disabled" : ""} onclick="markResultNotSolved('${feedbackKey}', '${stepId}', 'library', this, ${item.id})">${feedback?.status === "not_solved" ? "已记录没解决" : "没解决"}</button>
+                    <button class="btn secondary" onclick="copyText(${JSON.stringify(String(item.error_pattern || ""))}, '已复制历史报错')">复制历史报错</button>
+                    <span class="inline-msg">${item.error_fingerprint ? escapeHtml(item.error_fingerprint) : ""}</span>
+                    ${renderFeedbackHint(feedbackKey)}
+                  </div>
+                </div>
+              `;
+              }
+            )
+            .join("")}
+          `;
+        } catch {
+          resultEl.innerHTML = `
+            <div class="result-toolbar">
+              <div class="result-title">报错库请求失败</div>
+              <div class="result-status">可以尝试 AI 分析</div>
+            </div>
+            <div class="empty-state">当前无法连接报错库，请检查本地服务后重试。</div>
+          `;
+        }
+      }
+
+      async function analyzeWithAI(stepId) {
+        const output = state.stepOutputs[stepId];
+        const step = getStepById(stepId);
+        const resultEl = document.getElementById(`error-result-${stepId}`);
+        const payload = getConfigPayload();
+        renderFeedback(stepId, "");
+        if (!output || !resultEl) return;
+        if (!payload.apiKey) {
+          resultEl.innerHTML = `
+            <div class="result-toolbar">
+              <div class="result-title">缺少 API Key</div>
+              <div class="result-status">需要先配置后才能调用 AI</div>
+            </div>
+            <div class="empty-state">请先在右侧配置区域输入 API Key，再点击“AI 分析”。</div>
+          `;
+          return;
+        }
+
+        resultEl.innerHTML = `
+          <div class="result-toolbar">
+            <div class="result-title">AI 正在分析当前报错</div>
+            <div class="result-status">会结合命令、系统和输出内容</div>
+          </div>
+        `;
+
+        try {
+          const version = getCurrentOpenClawVersion();
+          const feedbackKey = makeFeedbackKey(
+            "ai",
+            `${stepId}:${simpleHash(getFullErrorText(stepId))}`
+          );
+          const feedback = getStoredFeedback(feedbackKey);
+          const res = await fetch(`${API_BASE}/llm/analyze`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              apiKey: payload.apiKey,
+              baseUrl: payload.baseUrl,
+              model: payload.model,
+              error_text: output.lines.join("\n").slice(0, 2000),
+              command: step ? step.cmd : "",
+              os: state.os === "windows" ? "Windows" : "macOS",
+              openclaw_version: version
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "AI 分析失败");
+          resultEl.innerHTML = `
+            <div class="solution-card" id="solution-${stepId}">
+              <div class="solution-meta">
+                <div>${renderSourceBadge("llm")}</div>
+                <div>${escapeHtml(version || "未检测到版本")}</div>
+              </div>
+              <div class="solution-summary">
+                <div>命令：<span class="mono">${escapeHtml(step ? step.cmd : "未知命令")}</span></div>
+                <div>系统：${state.os === "windows" ? "Windows" : "macOS"}</div>
+              </div>
+              ${renderAiSections(data.solution || "")}
+              ${renderAiActionItems(data.solution || "").replaceAll("__CURRENT_STEP__", stepId)}
+              <div class="solution-footer">
+                <button class="btn success" onclick="saveToLibrary('${stepId}', this)">保存到报错库</button>
+                <button class="btn secondary" ${feedback?.status === "helpful" ? "disabled" : ""} onclick="markResultHelpful('${feedbackKey}', this, '这条 AI 方案对你有帮助，建议保存到报错库。')">${feedback?.status === "helpful" ? "已反馈有帮助" : "有帮助"}</button>
+                <button class="btn secondary" ${feedback?.status === "not_solved" ? "disabled" : ""} onclick="markResultNotSolved('${feedbackKey}', '${stepId}', 'ai', this)">${feedback?.status === "not_solved" ? "已记录没解决" : "没解决"}</button>
+                <button class="btn secondary" onclick="copyText(${JSON.stringify(String(data.solution || ""))}, '已复制 AI 方案')">复制方案</button>
+                <button class="btn secondary" onclick="copyText(${JSON.stringify(getFullErrorText(stepId))}, '已复制当前报错')">复制报错</button>
+                <button class="btn secondary" onclick="analyzeWithAI('${stepId}')">重新分析</button>
+                <span class="inline-msg">保存后，下次遇到相似报错会优先命中报错库。</span>
+                ${renderFeedbackHint(feedbackKey)}
+              </div>
+            </div>
+          `;
+          document.getElementById(`solution-${stepId}`).__solution = data.solution;
+          renderQueueUi(stepId);
+        } catch (error) {
+          resultEl.innerHTML = `<div class="muted">${escapeHtml(error.message)}</div>`;
+        }
+      }
+
+      async function saveToLibrary(stepId, btn) {
+        const card = btn.closest(".solution-card");
+        const output = state.stepOutputs[stepId];
+        const step = getStepById(stepId);
+        if (!card || !output || !card.__solution) return;
+
+        try {
+          btn.disabled = true;
+          btn.textContent = "保存中...";
+          const res = await fetch(`${API_BASE}/errors`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              error_pattern: output.lines.join("\n").slice(0, 2000),
+              command: step ? step.cmd : "",
+              os: state.os === "windows" ? "Windows" : "macOS",
+              openclaw_version: getCurrentOpenClawVersion(),
+              solution: card.__solution,
+              source: "llm"
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "保存失败");
+          btn.textContent = "已保存";
+          let msg = card.querySelector(".inline-msg.save-status");
+          if (!msg) {
+            msg = document.createElement("span");
+            msg.className = "inline-msg ok save-status";
+            btn.parentElement.appendChild(msg);
+          }
+          msg.textContent = `已保存到报错库，记录 ID：${data.id}`;
+          await searchLibrary(stepId);
+        } catch (error) {
+          btn.disabled = false;
+          btn.textContent = "保存到报错库";
+          toast(error.message);
+        }
+      }
+
+      async function voteError(id, btn) {
+        try {
+          const res = await fetch(`${API_BASE}/errors/${id}/vote`, { method: "POST" });
+          if (!res.ok) throw new Error("点赞失败");
+          btn.disabled = true;
+          btn.textContent = "已标记有用";
+        } catch (error) {
+          toast(error.message);
+        }
+      }
+
+      async function checkHealth() {
+        try {
+          const res = await fetch(`${API_BASE}/health`);
+          if (!res.ok) throw new Error("Health check failed");
+          state.bridgeReady = true;
+        } catch {
+          state.bridgeReady = false;
+        }
+        renderHeader();
+      }
+
+      async function loadSystemInfo() {
+        try {
+          const res = await fetch(`${API_BASE}/system/info`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "系统状态获取失败");
+          state.systemInfo = data;
+          if (data.os === "Windows") {
+            state.os = "windows";
+          } else if (data.os === "macOS") {
+            state.os = "mac";
+          }
+          renderHeader();
+          renderSystemInfo();
+          syncSystemInfoToSteps();
+        } catch (error) {
+          state.systemInfo = null;
+          renderSystemInfo();
+          console.error(error);
+        }
+      }
+
+      document.getElementById("workspace-input").value = getWorkspaceDefault();
+      renderHeader();
+      renderStepsMode();
+      renderSystemInfo();
+      renderSteps();
+      renderCommonActions();
+      checkHealth();
+      connectWS();
+      loadConfigPaths();
+      loadSystemInfo();
+    </script>
+  </body>
+</html>

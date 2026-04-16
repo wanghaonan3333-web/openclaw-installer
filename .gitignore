@@ -1,0 +1,7 @@
+node_modules/
+release/
+data/errors.db
+data/errors.db-shm
+data/errors.db-wal
+data/generated/
+data/localtunnel*.log

@@ -1,0 +1,56 @@
+{
+  "name": "openclaw-local-installer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "desktop/main.js",
+  "author": "OpenClaw",
+  "description": "OpenClaw local installer guide with bridge API, config editor, and error library.",
+  "scripts": {
+    "start": "node bridge.js",
+    "desktop:dev": "electron .",
+    "desktop:pack": "node desktop/build.js",
+    "desktop:pack:win": "node desktop/build.js win",
+    "desktop:pack:mac": "node desktop/build.js mac"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "electron": "^36.2.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.openclaw.installer",
+    "productName": "OpenClaw Installer",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "bridge.js",
+      "index.html",
+      "openclaw.template.json",
+      "src/**/*",
+      "desktop/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "desktop/main.js"
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools"
+    }
+  }
+}
