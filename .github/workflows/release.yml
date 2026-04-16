@@ -82,3 +82,24 @@ jobs:
             dist/windows/*.exe
             dist/macos/*.dmg
             dist/macos/*.zip
+
+      - name: Notify Feishu
+        if: always()
+        run: |
+          TOKEN=$(curl -s -X POST https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal \
+            -H "Content-Type: application/json" \
+            -d "{\"app_id\":\"$FEISHU_APP_ID\",\"app_secret\":\"$FEISHU_APP_SECRET\"}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['tenant_access_token'])")
+          if [ "${{ job.status }}" = "success" ]; then
+            MSG="✅ OpenClaw ${{ github.ref_name }} 构建成功！\nWindows + macOS 安装包已发布：https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+          else
+            MSG="❌ OpenClaw ${{ github.ref_name }} 构建失败，请查看：https://github.com/${{ github.repository }}/actions"
+          fi
+          curl -s -X POST "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"receive_id\":\"$FEISHU_CHAT_ID\",\"msg_type\":\"text\",\"content\":\"{\\\"text\\\":\\\"$MSG\\\"}\"}"
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          FEISHU_CHAT_ID: ${{ secrets.FEISHU_CHAT_ID }}
